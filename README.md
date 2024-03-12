@@ -61,12 +61,6 @@ To contribute, follow these steps:
 
 Alternatively, see the GitHub documentation on [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
-## Contributors
-
-Thanks to the following people who have contributed to this project:
-
-- Your name here
-
 ## Contact
 
 If you want to contact me, you can reach me at `avatsa@stevens.edu`.

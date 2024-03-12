@@ -70,6 +70,34 @@ predicted = model.predict(X_test)
 predicted_inversed = scaler.inverse_transform(np.concatenate((predicted, np.zeros((predicted.shape[0], scaled_data.shape[1]-1))), axis=1))[:, 0]
 y_test_inversed = scaler.inverse_transform(np.concatenate((y_test.reshape(-1,1), np.zeros((y_test.shape[0], scaled_data.shape[1]-1))), axis=1))[:, 0]
 
+def apply_stop_loss_and_take_profit(actual_prices, predicted_prices, stop_loss_pct=0.1, take_profit_pct=0.2):
+    positions = np.zeros(len(actual_prices))
+    entry_price = 0
+    for i in range(1, len(actual_prices)):
+        if positions[i-1] == 0 and predicted_prices[i] > actual_prices[i-1]:
+            positions[i] = 1  # Enter long position
+            entry_price = actual_prices[i-1]
+        elif positions[i-1] == 1:
+            if actual_prices[i] < entry_price * (1 - stop_loss_pct):
+                positions[i] = 0  # Exit long position due to stop-loss
+            elif actual_prices[i] > entry_price * (1 + take_profit_pct):
+                positions[i] = 0  # Exit long position due to take-profit
+            elif predicted_prices[i] < actual_prices[i]:
+                positions[i] = 0  # Exit long position based on prediction
+            else:
+                positions[i] = 1  # Maintain long position
+    return positions
+
+# Get the actual prices for the test period
+actual_prices = data['Price'][len(data) - len(y_test_inversed):]
+
+# Apply stop-loss and take-profit to the predicted prices
+positions = apply_stop_loss_and_take_profit(actual_prices, predicted_inversed)
+
+# Calculate and print RMSE
+rmse = sqrt(mean_squared_error(y_test_inversed, predicted_inversed))
+print(f"Root Mean Squared Error: {rmse}")
+
 # Calculate and print RMSE
 rmse = sqrt(mean_squared_error(y_test_inversed, predicted_inversed))
 print(f"Root Mean Squared Error: {rmse}")
